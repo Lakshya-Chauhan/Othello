@@ -20,8 +20,15 @@ class board:
         for x in range(8):
             for y in range(8):
                 if Board[x][y] == 0:
-                    color_sum =  sum([Board[(x+1) if x < 7 else x][(y-1) if y > 0 else y], Board[(x+1) if x < 7 else x][y], Board[(x+1) if x < 7 else x][(y+1) if y < 7 else y], Board[x][(y-1) if y > 0 else y], Board[x][(y+1) if y < 7 else y], Board[(x-1) if x > 0 else x][(y-1) if y > 0 else y], Board[(x-1) if x > 0 else x][y], Board[(x-1) if x > 0 else x][(y+1) if y < 7 else y]])
-                    if (color_sum != 0) and (color_sum%(board.opp(color)) != 0):
+                    color_sum =  sum([Board[(x+1) if x < 7 else x][(y-1) if y > 0 else y], 
+                                      Board[(x+1) if x < 7 else x][y], 
+                                      Board[(x+1) if x < 7 else x][(y+1) if y < 7 else y], 
+                                      Board[x][(y-1) if y > 0 else y], 
+                                      Board[x][(y+1) if y < 7 else y], 
+                                      Board[(x-1) if x > 0 else x][(y-1) if y > 0 else y], 
+                                      Board[(x-1) if x > 0 else x][y], 
+                                      Board[(x-1) if x > 0 else x][(y+1) if y < 7 else y]])
+                    if (color_sum != 0) and (color_sum%color != 0):
                         if board.isLegalMove(board, (x, y), color):
                             legalMoves.add((x, y))
                 continue
@@ -31,7 +38,7 @@ class board:
         return board.white if color == board.black else (board.black if color == board.white else None)
     
     def colour(color):
-        return 0 if color == 89 else (1 if color == -11 else None)
+        return 0 if color == board.white else (1 if color == board.black else None)
 
 
     def isLegalMove(self, coords, color):
@@ -119,6 +126,7 @@ class board:
                     for disc in discs:
                         board.currentBoard[disc[0]][disc[1]] = color
                     discs.clear()
+                    break
                 if Board[x][coords[1]] == 0:
                     discs.clear()
                     break
@@ -131,6 +139,7 @@ class board:
                     for disc in discs:
                         board.currentBoard[disc[0]][disc[1]] = color
                     discs.clear()
+                    break
                 if Board[coords[0]][y] == 0:
                     discs.clear()
                     break
@@ -143,6 +152,7 @@ class board:
                     for disc in discs:
                         board.currentBoard[disc[0]][disc[1]] = color
                     discs.clear()
+                    break
                 if Board[x][coords[1]] == 0:
                     discs.clear()
                     break
@@ -155,6 +165,7 @@ class board:
                     for disc in discs:
                         board.currentBoard[disc[0]][disc[1]] = color
                     discs.clear()
+                    break
                 if Board[coords[0]][y] == 0:
                     discs.clear()
                     break
@@ -170,6 +181,7 @@ class board:
                     for disc in discs:
                         board.currentBoard[disc[0]][disc[1]] = color
                     discs.clear()
+                    break
                 if Board[coords[0]+i][coords[1]+i] == 0:
                     discs.clear()
                     break
@@ -185,6 +197,7 @@ class board:
                     for disc in discs:
                         board.currentBoard[disc[0]][disc[1]] = color
                     discs.clear()
+                    break
                 if Board[coords[0]-i][coords[1]+i] == 0:
                     discs.clear()
                     break
@@ -200,6 +213,7 @@ class board:
                     for disc in discs:
                         board.currentBoard[disc[0]][disc[1]] = color
                     discs.clear()
+                    break
                 if Board[coords[0]+i][coords[1]-i] == 0:
                     discs.clear()
                     break
@@ -215,8 +229,10 @@ class board:
                     for disc in discs:
                         board.currentBoard[disc[0]][disc[1]] = color
                     discs.clear()
+                    break
                 if Board[coords[0]-i][coords[1]-i] == 0:
                     discs.clear()
                     break
 
         return False
+    
