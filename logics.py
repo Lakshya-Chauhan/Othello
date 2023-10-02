@@ -9,10 +9,10 @@ class board:
             board.currentBoard.append(list())
             for _ in range(8):
                 board.currentBoard[i].append(0)
-        board.currentBoard[3][3] = board.black       #89 is white
-        board.currentBoard[3][4] = board.white       #-11 is black
-        board.currentBoard[4][3] = board.white       #-11 is black
-        board.currentBoard[4][4] = board.black       #89 is white
+        board.currentBoard[3][3] = board.white       #-11 is black
+        board.currentBoard[3][4] = board.black       #89 is white
+        board.currentBoard[4][3] = board.black       #89 is white
+        board.currentBoard[4][4] = board.white       #-11 is black
 
     def allLegalMoves(self, color):
         Board = board.currentBoard

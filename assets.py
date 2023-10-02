@@ -1,8 +1,7 @@
 import pygame
 
-woodBG = pygame.image.load("assets/images/woodBG.jpg")
-whiteD = pygame.image.load("assets/images/whiteDisc.png")
-blackD = pygame.image.load("assets/images/blackDisc.png")
+icon = pygame.image.load('assets/images/icon.jpg')
 boardBack = pygame.image.load("assets/images/boardBack.png")
-
-DISC = [whiteD, blackD]
+homeScreen = pygame.image.load("assets/images/homeScreen.png")
+restartGame = pygame.image.load("assets/images/restartGame.png")
+logoOthello = pygame.image.load("assets/images/logo.png")
