@@ -1,3 +1,5 @@
+from random import random
+import pygame
 class board:
     currentBoard = None
     white = 89
@@ -236,3 +238,45 @@ class board:
 
         return False
     
+class sphere:
+    def __init__(self, position : list, radius : float, velocity, number : int, color : list):
+        self.pos = pygame.math.Vector2(position[0], position[1])
+        self.radius = radius
+        self.vel = pygame.math.Vector2(velocity[0], velocity[1])
+        self.n = number
+        self.color = color
+    
+    def update(self, dt, screen_res, cell_side):
+
+        if self.vel.magnitude() > 50:
+            self.vel = pygame.math.Vector2(50).rotate(pygame.math.Vector2(50).angle_to(self.vel))
+
+        if (self.pos[0] > screen_res[0]-10):
+            self.pos[0] = (screen_res[0]-11)
+            self.vel[0] = -self.vel[0]
+        elif self.pos[0] < 10:
+            self.pos[0] = 11
+            self.vel[0] = -self.vel[0]
+        
+        if (self.pos[1] > screen_res[1]-10):
+            self.pos[1] = (screen_res[1]-11)
+            self.vel[1] = -self.vel[1]
+        elif self.pos[1] < 10:
+            self.pos[1] = 11
+            self.vel[1] = -self.vel[1]
+
+        if (screen_res[0]/2 - cell_side*4 < self.pos[0] < screen_res[0]/2 + cell_side*4) and (screen_res[1]/2 - cell_side*4 < self.pos[1] < screen_res[1]/2 + cell_side*4):
+            self.pos[0] = (screen_res[0]/2 - cell_side*4) if random() > 0.5 else (screen_res[0]/2 + cell_side*4)
+            self.pos[1] = (screen_res[1]/2 - cell_side*4) if random() > 0.5 else (screen_res[1]/2 + cell_side*4)
+
+        self.pos += self.vel*dt
+
+    def is_colliding(obj1, obj2):
+        return True if (sphere.distance(obj1.pos, obj2.pos) < obj1.radius + obj2.radius) else False
+
+    def distance(point1 : list, point2 : list):
+        if min([len(point1), len(point2)]) == 2:
+            return ((((point1[0]-point2[0])**2) + ((point1[1] - point2[1])**2))**0.5)
+        
+        else:
+            return ((((point1[0]-point2[0])**2) + ((point1[1] - point2[1])**2) + ((point1[2] - point2[2])**2))**0.5)
