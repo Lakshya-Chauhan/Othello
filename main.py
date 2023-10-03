@@ -6,13 +6,13 @@ from logics import *
 from random import random
 FoNt = 0
 FoNtprint = 0
-
 # MAX_SIZE = (1920, 1080)#px 1009
 MIN_SIZE = (120, 80)#px
 prevScreen_res = (1200, 800)
 screen_res = [1200, 800]
 cell_side = (min(screen_res))*(3/32)
 WINDOW = "homeScreen"
+AI = [None, 1] #Level, TURN
 mcolor = [128, 128, 128]
 mrad = (sum(screen_res))/30
 bBack = pygame.transform.scale(boardBack, ((min(screen_res))*(7/16)*(2**0.5), (min(screen_res))*(7/16)*(2**0.5)))
@@ -33,14 +33,37 @@ def cls():
 def font(face:str, size=18, Bold = False, Italic = False):
     global FoNt
     FoNt = pygame.font.SysFont(face,size,Bold,Italic)
-def printpy(text:str,coords=(100,400),color=(128,128,128), center = False):
+
+def printpy(text:str,coords=(100,400),color=(128,128,128), center = False, size = False):
     global FoNt,FoNtprint
     FoNtprint = FoNt.render(text, True, color)
+    if size == True:
+        return [FoNtprint.get_width(), FoNtprint.get_height()]
     if center == True:
         screen.blit(FoNtprint, [coords[0]-FoNtprint.get_width()/2, coords[1]-FoNtprint.get_height()/2])
     else:
         screen.blit(FoNtprint, coords)
+def assignButtons(Section):
+    font("Arial Black", int(cell_side/2))
+    
+    BUTTON = {
+        'homeScreen': [["Play", printpy("Play", (0, 0), (0, 0, 0), True, True)],
+                   ["Options", printpy("Options", (0, 0), (0, 0, 0), True, True)],
+                   ["About", printpy("About", (0, 0), (0, 0, 0), True, True)],
+                   ["Quit", printpy("Quit", (0, 0), (0, 0, 0), True, True)]],
 
+        'playType': [["Human vs Human", printpy("Human vs Human", (0, 0), (0, 0, 0), True, True)],
+                    ["Human vs AI", printpy("Human vs AI", (0, 0), (0, 0, 0), True, True)],
+                    ["Load Saved Game", printpy("Load Saved Game", (0, 0), (0, 0, 0), True, True)],
+                    ["Back", printpy("Back", (0, 0), (0, 0, 0), True, True)]],
+
+        'aiType': [["Easy", printpy("Easy", (0, 0), (0, 0, 0), True, True)],
+                    ["Medium", printpy("Medium", (0, 0), (0, 0, 0), True, True)],
+                    ["Hard", printpy("Hard", (0, 0), (0, 0, 0), True, True)],
+                    ["Back", printpy("Back", (0, 0), (0, 0, 0), True, True)]]
+    }
+    return BUTTON[Section]
+    
 
 def drawBoard():
     global cell_side, screen_res, discsOnBoard, prevScreen_res, Color, boardBack,bBack, OBJS, TURN, discCount, gameOver, hScreen, rGame
@@ -54,7 +77,7 @@ def drawBoard():
         hScreen = pygame.transform.scale(homeScreen, (cell_side*(2**0.5)/2, cell_side*(2**0.5)/2))
         
         OBJS = list()
-        for _ in range(int((sum(screen_res))/60)):
+        for _ in range(int((sum(screen_res))/90)):
             OBJS.append( sphere([random()*screen_res[0], random()*screen_res[1]], random()*(sum(screen_res))/7.5, [(0.5-random())*8, (0.5-random())*8], _, [random()*256, random()*256, random()*256]) )
 
     screen.blit(bBack, ((screen_res[0]/2-(bBack.get_height())/2),(screen_res[1]/2-(bBack.get_height())/2)), ((bBack.get_width())/2-(bBack.get_height())/2, 0, bBack.get_height(), bBack.get_height()))
@@ -112,7 +135,7 @@ def drawBoard():
         printpy("GAME OVER", (screen_res[0]/2, screen_res[1]/2 + 4.35*cell_side), (128, 128, 128), True)
         
 def drawHomeScreen():
-    global cell_side, screen_res, prevScreen_res, boardBack, bBack, OBJS, lOthello, mainOthelloText, WINDOW
+    global cell_side, screen_res, prevScreen_res, boardBack, bBack, OBJS, lOthello, mainOthelloText, WINDOW, buttons
     if prevScreen_res != screen_res:
         prevScreen_res = list(screen_res)
         cell_side = (min(screen_res))*(3/32)
@@ -121,8 +144,11 @@ def drawHomeScreen():
         font("Bauhaus 93", int(cell_side*2))
         mainOthelloText = FoNt.render("Othello", True, (190, 255, 225))
         lOthello = pygame.transform.scale(icon, (cell_side*1.5, cell_side*1.5))
+        font("Arial Black", int(cell_side/2))
+        for index in range(len(buttons)):
+            buttons[index] = [buttons[index][0], printpy(buttons[index][0], (0, 0), (0, 0, 0), True, True)]
         OBJS = list()
-        for _ in range(int((sum(screen_res))/60)):
+        for _ in range(int((sum(screen_res))/90)):
             OBJS.append( sphere([random()*screen_res[0], random()*screen_res[1]], random()*(sum(screen_res))/7.5, [(0.5-random())*8, (0.5-random())*8], _, [random()*256, random()*256, random()*256]) )
 
     screen.blit(bBack, ((screen_res[0]/2-(bBack.get_height())/2),(screen_res[1]/2-(bBack.get_height())/2)), ((bBack.get_width())/2-(bBack.get_height())/2, 0, bBack.get_height(), bBack.get_height()))
@@ -130,27 +156,13 @@ def drawHomeScreen():
     screen.blit(mainOthelloText, (screen_res[0]/2+(cell_side*1.5)/2-(mainOthelloText.get_width())/2, screen_res[1]/2 -cell_side*0.4 - 3*cell_side))
 
     font("Arial Black", int(cell_side/2))
-    if WINDOW == "homeScreen":
-        mousePos = pygame.mouse.get_pos()
-        cursorOn = None
-        if (screen_res[0]/2-0.58*cell_side<mousePos[0]<screen_res[0]/2+0.58*cell_side) and (screen_res[1]/2 - 0.3533*cell_side < mousePos[1] < screen_res[1]/2 + 0.3533*cell_side):
-            cursorOn = 0
-        if (screen_res[0]/2-1.0467*cell_side<mousePos[0]<screen_res[0]/2+1.0467*cell_side) and (screen_res[1]/2 + 0.6467*cell_side < mousePos[1] < screen_res[1]/2 + 1.3533*cell_side):
-            cursorOn = 1
-        if (screen_res[0]/2-0.8*cell_side<mousePos[0]<screen_res[0]/2+0.8*cell_side) and (screen_res[1]/2 + 1.6467*cell_side < mousePos[1] < screen_res[1]/2 + 2.3533*cell_side):
-            cursorOn = 2
-        if (screen_res[0]/2-0.64*cell_side<mousePos[0]<screen_res[0]/2+0.64*cell_side) and (screen_res[1]/2 + 2.6467*cell_side < mousePos[1] < screen_res[1]/2 + 3.3533*cell_side):
-            cursorOn = 3
-        printpy("Play", (screen_res[0]/2, screen_res[1]/2), (150, 150, 255) if cursorOn == 0 else (150, 235, 255), True)
-        printpy("Options", (screen_res[0]/2, screen_res[1]/2 + cell_side), (150, 150, 255) if cursorOn == 1 else (150, 235, 255), True)
-        printpy("About", (screen_res[0]/2, screen_res[1]/2 + cell_side*2), (150, 150, 255) if cursorOn == 2 else (150, 235, 255), True)
-        printpy("Quit", (screen_res[0]/2, screen_res[1]/2 + 3*cell_side), (150, 150, 255) if cursorOn == 3 else (150, 235, 255), True)
-    if WINDOW == "PlayType":
-        pass
-    if WINDOW == "Options":
-        pass
-    if WINDOW == "About":
-        pass
+    mousePos = pygame.mouse.get_pos()
+    if WINDOW in ("homeScreen", "playType", "aiType"):
+        for i in range(len(buttons)):
+            if (-buttons[i][1][0]/2<mousePos[0]-screen_res[0]/2<buttons[i][1][0]/2) and (-buttons[i][1][1]/2<mousePos[1]-screen_res[1]/2-i*cell_side<buttons[i][1][1]/2):
+                printpy(buttons[i][0], (screen_res[0]/2, screen_res[1]/2 + i*cell_side), (150, 150, 255), True)
+            else:
+                printpy(buttons[i][0], (screen_res[0]/2, screen_res[1]/2 + i*cell_side), (150, 235, 255), True)
 
 
 
@@ -196,14 +208,17 @@ if __name__ == '__main__':
     cls()
     font("Bauhaus 93", int(cell_side*2))
     mainOthelloText = FoNt.render("Othello", True, (190, 255, 225))
+    font("Arial Black", int(cell_side/2))
+    buttons = assignButtons(WINDOW)
+    
     lOthello = pygame.transform.scale(icon, (cell_side*1.5, cell_side*1.5))
     OBJS = list()
-    for _ in range(int((sum(screen_res))/60)):
+    for _ in range(int((sum(screen_res))/90)):
         OBJS.append( sphere([random()*screen_res[0], random()*screen_res[1]], random()*(sum(screen_res))/7.5, [(0.5-random())*8, (0.5-random())*8], _, [random()*256, random()*256, random()*256]) )
     running = True
     clock = pygame.time.Clock()
     rectangle = pygame.Surface(screen_res)
-    rectangle.set_alpha(50)
+    rectangle.set_alpha(20)
     rectangle.fill((0, 0, 0))
     while running == True:
         initTime = time.time()
@@ -215,7 +230,7 @@ if __name__ == '__main__':
         if tempScreen_res != screen_res:
             screen = pygame.display.set_mode(screen_res, pygame.RESIZABLE)
             OBJS = list()
-            for _ in range(int((sum(screen_res))/60)):
+            for _ in range(int((sum(screen_res))/90)):
                 OBJS.append( sphere([random()*screen_res[0], random()*screen_res[1]], random()*(sum(screen_res))/7.5, [(0.5-random())*8, (0.5-random())*8], _, [random()*256, random()*256, random()*256]) )
     
         for event in pygame.event.get():
@@ -241,6 +256,7 @@ if __name__ == '__main__':
                     else:
                         if sphere.distance((screen_res[0]/2 +4.6*cell_side + cell_side*2/15, screen_res[1]/2 + cell_side + cell_side), mspos) < cell_side/2:
                             WINDOW = "homeScreen"
+                            buttons = assignButtons(WINDOW)
                         if gameOver == True:
                             if sphere.distance((screen_res[0]/2 +4.6*cell_side + cell_side*2/15, screen_res[1]/2), mspos) < cell_side/2:
                                 gameOver = False
@@ -254,25 +270,60 @@ if __name__ == '__main__':
                                 discCount = [2, 2]
                                 board.__init__(board)
                 elif WINDOW == "homeScreen":
-                    if (screen_res[0]/2-0.58*cell_side<mspos[0]<screen_res[0]/2+0.58*cell_side) and (screen_res[1]/2 - 0.3533*cell_side < mspos[1] < screen_res[1]/2 + 0.3533*cell_side):
-                        WINDOW = "PvP"
-                        gameOver = False
-                        cell_side = (min(screen_res))*(3/32)
-                        discsOnBoard = [(3,3), (3,4), (4,3), (4,4)]
-                        bBack = pygame.transform.scale(boardBack, ((min(screen_res))*(7/16)*(2**0.5), (min(screen_res))*(7/16)*(2**0.5)))
-                        rGame = pygame.transform.scale(restartGame, (cell_side*(2**0.5)*0.8/2, cell_side*(2**0.5)*0.8/2))
-                        hScreen = pygame.transform.scale(homeScreen, (cell_side*(2**0.5)/2, cell_side*(2**0.5)/2))
-                        Color = [(255, 255, 255), (0, 0, 0)]
-                        TURN = 1
-                        discCount = [2, 2]
-                        board.__init__(board)
+                    for i in range(len(buttons)):
+                        if (-buttons[i][1][0]/2<mspos[0]-screen_res[0]/2<buttons[i][1][0]/2) and (-buttons[i][1][1]/2<mspos[1]-screen_res[1]/2-i*cell_side<buttons[i][1][1]/2):
+                            if 'play' in buttons[i][0].lower():
+                                WINDOW = 'playType'
+                                buttons = assignButtons(WINDOW)
+                            elif 'options' in buttons[i][0].lower():
+                                pass
+                            elif 'about' in buttons[i][0].lower():
+                                pass
+                            elif 'quit' in buttons[i][0].lower() or 'exit' in buttons[i][0].lower():
+                                running = False
+                elif WINDOW == "playType":
+                    for i in range(len(buttons)):
+                        if (-buttons[i][1][0]/2<mspos[0]-screen_res[0]/2<buttons[i][1][0]/2) and (-buttons[i][1][1]/2<mspos[1]-screen_res[1]/2-i*cell_side<buttons[i][1][1]/2):
+                            if 'ai' in buttons[i][0].lower():
+                                WINDOW = 'aiType'
+                                buttons = assignButtons(WINDOW)
+                            elif 'load' in buttons[i][0].lower():
+                                pass
+                            elif 'back' in buttons[i][0].lower():
+                                WINDOW = 'homeScreen'
+                                buttons = assignButtons(WINDOW)
+                            elif 'ai' not in buttons[i][0].lower() and ('human' in buttons[i][0].lower() or 'Player' in buttons[i][0].lower()):
+                                WINDOW = "PvP"
+                                gameOver = False
+                                cell_side = (min(screen_res))*(3/32)
+                                discsOnBoard = [(3,3), (3,4), (4,3), (4,4)]
+                                bBack = pygame.transform.scale(boardBack, ((min(screen_res))*(7/16)*(2**0.5), (min(screen_res))*(7/16)*(2**0.5)))
+                                rGame = pygame.transform.scale(restartGame, (cell_side*(2**0.5)*0.8/2, cell_side*(2**0.5)*0.8/2))
+                                hScreen = pygame.transform.scale(homeScreen, (cell_side*(2**0.5)/2, cell_side*(2**0.5)/2))
+                                Color = [(255, 255, 255), (0, 0, 0)]
+                                TURN = 1
+                                discCount = [2, 2]
+                                board.__init__(board)
+                elif WINDOW == "aiType":
+                    for i in range(len(buttons)):
+                        if (-buttons[i][1][0]/2<mspos[0]-screen_res[0]/2<buttons[i][1][0]/2) and (-buttons[i][1][1]/2<mspos[1]-screen_res[1]/2-i*cell_side<buttons[i][1][1]/2):
+                            if 'back' in buttons[i][0].lower():
+                                WINDOW = 'playType'
+                                buttons = assignButtons(WINDOW)
+                            elif 'easy' in buttons[i][0].lower() or 'Hard' in buttons[i][0].lower() or 'medium' in buttons[i][0].lower() or 'moderate' in buttons[i][0].lower():
+                                WINDOW = "PvP"
+                                AI = [buttons[i][0].lower(), (AI[1]+1)%2]
+                                gameOver = False
+                                cell_side = (min(screen_res))*(3/32)
+                                discsOnBoard = [(3,3), (3,4), (4,3), (4,4)]
+                                bBack = pygame.transform.scale(boardBack, ((min(screen_res))*(7/16)*(2**0.5), (min(screen_res))*(7/16)*(2**0.5)))
+                                rGame = pygame.transform.scale(restartGame, (cell_side*(2**0.5)*0.8/2, cell_side*(2**0.5)*0.8/2))
+                                hScreen = pygame.transform.scale(homeScreen, (cell_side*(2**0.5)/2, cell_side*(2**0.5)/2))
+                                Color = [(255, 255, 255), (0, 0, 0)]
+                                TURN = 1
+                                discCount = [2, 2]
+                                board.__init__(board)
 
-                    if (screen_res[0]/2-1.0467*cell_side<mspos[0]<screen_res[0]/2+1.0467*cell_side) and (screen_res[1]/2 + 0.6467*cell_side < mspos[1] < screen_res[1]/2 + 1.3533*cell_side):
-                        pass
-                    if (screen_res[0]/2-0.8*cell_side<mspos[0]<screen_res[0]/2+0.8*cell_side) and (screen_res[1]/2 + 1.6467*cell_side < mspos[1] < screen_res[1]/2 + 2.3533*cell_side):
-                        pass
-                    if (screen_res[0]/2-0.64*cell_side<mspos[0]<screen_res[0]/2+0.64*cell_side) and (screen_res[1]/2 + 2.6467*cell_side < mspos[1] < screen_res[1]/2 + 3.3533*cell_side):
-                        running = False
                                     
                         
         #Code Here
@@ -281,10 +332,10 @@ if __name__ == '__main__':
             background()
             # ======================END OF CODE FOR BACKGROUND======================
             drawBoard()
-        elif WINDOW == "homeScreen":
+        elif WINDOW in ("homeScreen", "playType", "aiType"):
             background()
             drawHomeScreen()
-            pass
+        
 
 
         pygame.display.update()
