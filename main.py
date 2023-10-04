@@ -19,6 +19,7 @@ bBack = pygame.transform.scale(boardBack, ((min(screen_res))*(7/16)*(2**0.5), (m
 lOthello = pygame.transform.scale(icon, (cell_side, cell_side))
 
 gameOver = False
+lastMove = None
 discsOnBoard = [(3,3), (3,4), (4,3), (4,4)]
 rGame = pygame.transform.scale(restartGame, (cell_side*(2**0.5)*0.8/2, cell_side*(2**0.5)*0.8/2))
 hScreen = pygame.transform.scale(homeScreen, (cell_side*(2**0.5)/2, cell_side*(2**0.5)/2))
@@ -66,7 +67,7 @@ def assignButtons(Section):
     
 
 def drawBoard():
-    global cell_side, screen_res, discsOnBoard, prevScreen_res, Color, boardBack,bBack, OBJS, TURN, discCount, gameOver, hScreen, rGame
+    global cell_side, screen_res, discsOnBoard, prevScreen_res, Color, boardBack,bBack, OBJS, TURN, discCount, gameOver, hScreen, rGame, lastMove
     pr = (min(screen_res))*(7/16)*(2**0.5) #pattern radius
     if prevScreen_res != screen_res:
         prevScreen_res = list(screen_res)
@@ -89,6 +90,10 @@ def drawBoard():
     # screen.blit(Disc[board.colour(board.currentBoard[disc[0]][disc[1]])], (screen_res[0]/2 + (disc[0]-4)*cell_side + cell_side/20, screen_res[1]/2 + (disc[1]-4)*cell_side + cell_side/20))
         pygame.draw.circle(screen, Color[board.colour(board.currentBoard[disc[0]][disc[1]])], (screen_res[0]/2 + (disc[0]-4)*cell_side + cell_side/2, screen_res[1]/2 + (disc[1]-4)*cell_side + cell_side/2), cell_side*9/20)
     
+    if lastMove != None:
+        pygame.draw.circle(screen, [230, 50, 50], (screen_res[0]/2 + (lastMove[0]-4)*cell_side + cell_side/2, screen_res[1]/2 + (lastMove[1]-4)*cell_side + cell_side/2), int(cell_side/15))
+        pygame.draw.circle(screen, [150, 50, 50], (screen_res[0]/2 + (lastMove[0]-4)*cell_side + cell_side/2, screen_res[1]/2 + (lastMove[1]-4)*cell_side + cell_side/2), int(cell_side/15), int(cell_side/23))
+
     for c in board.allLegalMoves(board, board.player[TURN]):
         pygame.draw.circle(screen, [200, 200, 200] if TURN == 0 else [55, 55, 55], (screen_res[0]/2 + (c[0]-4)*cell_side + cell_side/2, screen_res[1]/2 + (c[1]-4)*cell_side + cell_side/2), cell_side*3/20)
         pygame.draw.circle(screen, [230, 230, 230] if TURN == 0 else [25, 25, 25], (screen_res[0]/2 + (c[0]-4)*cell_side + cell_side/2, screen_res[1]/2 + (c[1]-4)*cell_side + cell_side/2), cell_side/10)
@@ -248,6 +253,7 @@ if __name__ == '__main__':
                             discsOnBoard.append(cellClicked)
                             discCount[0] = sum(i.count(board.white) for i in board.currentBoard)
                             discCount[1] = len(discsOnBoard) - discCount[0]
+                            lastMove = cellClicked
                             TURN = (TURN+1)%2
                             if len(board.allLegalMoves(board, board.player[TURN])) == 0:
                                 TURN = (TURN+1)%2
@@ -265,6 +271,8 @@ if __name__ == '__main__':
                                 bBack = pygame.transform.scale(boardBack, ((min(screen_res))*(7/16)*(2**0.5), (min(screen_res))*(7/16)*(2**0.5)))
                                 rGame = pygame.transform.scale(restartGame, (cell_side*(2**0.5)*0.8/2, cell_side*(2**0.5)*0.8/2))
                                 hScreen = pygame.transform.scale(homeScreen, (cell_side*(2**0.5)/2, cell_side*(2**0.5)/2))
+                                lastMove = None
+                                AI = [AI[0], (AI[1]+1)%2]
                                 Color = [(255, 255, 255), (0, 0, 0)]
                                 TURN = 1
                                 discCount = [2, 2]
@@ -300,6 +308,8 @@ if __name__ == '__main__':
                                 bBack = pygame.transform.scale(boardBack, ((min(screen_res))*(7/16)*(2**0.5), (min(screen_res))*(7/16)*(2**0.5)))
                                 rGame = pygame.transform.scale(restartGame, (cell_side*(2**0.5)*0.8/2, cell_side*(2**0.5)*0.8/2))
                                 hScreen = pygame.transform.scale(homeScreen, (cell_side*(2**0.5)/2, cell_side*(2**0.5)/2))
+                                AI = [None, AI[1]]
+                                lastMove = None
                                 Color = [(255, 255, 255), (0, 0, 0)]
                                 TURN = 1
                                 discCount = [2, 2]
@@ -319,6 +329,7 @@ if __name__ == '__main__':
                                 bBack = pygame.transform.scale(boardBack, ((min(screen_res))*(7/16)*(2**0.5), (min(screen_res))*(7/16)*(2**0.5)))
                                 rGame = pygame.transform.scale(restartGame, (cell_side*(2**0.5)*0.8/2, cell_side*(2**0.5)*0.8/2))
                                 hScreen = pygame.transform.scale(homeScreen, (cell_side*(2**0.5)/2, cell_side*(2**0.5)/2))
+                                lastMove = None
                                 Color = [(255, 255, 255), (0, 0, 0)]
                                 TURN = 1
                                 discCount = [2, 2]
@@ -328,9 +339,45 @@ if __name__ == '__main__':
                         
         #Code Here
         if WINDOW == "PvP":
-            # =====================START OF CODE FOR BACKGROUND=====================
+            if AI[0] != None and AI[1] == TURN:
+                LegalMoves = list(board.allLegalMoves(board, board.player[TURN]))
+                if len(LegalMoves) > 0:
+                    if 'easy' in AI[0]:
+                        randomIndex = int((random())*(len(LegalMoves)))
+                        board.currentBoard[LegalMoves[randomIndex][0]][LegalMoves[randomIndex][1]] = board.player[TURN]
+                        board.makeMove(board, LegalMoves[randomIndex], board.player[TURN])
+                        discsOnBoard.append(LegalMoves[randomIndex])
+                        lastMove = LegalMoves[randomIndex]
+
+                    if 'medium' in AI[0] or 'moderate' in AI[0]:
+                        staticWeightHeuristicFunc = [
+                            [4, -3, 2, 2, 2, 2, -3, 4], 
+                            [-3, -4, -1, -1, -1, -1, -4, -3], 
+                            [2, -1, 1, 0, 0, 1, -1, 2], 
+                            [2, -1, 0, 1, 1, 0, -1, 2], 
+                            [2, -1, 0, 1, 1, 0, -1, 2], 
+                            [2, -1, 1, 0, 0, 1, -1, 2], 
+                            [-3, -4, -1, -1, -1, -1, -4, -3], 
+                            [4, -3, 2, 2, 2, 2, -3, 4]
+                        ]
+                        moveBoardEval1move = [staticWeightHeuristicFunc[i[0]][i[1]] for i in LegalMoves]
+                        moveIndex = moveBoardEval1move.index(max(moveBoardEval1move))
+                        board.currentBoard[LegalMoves[moveIndex][0]][LegalMoves[moveIndex][1]] = board.player[TURN]
+                        board.makeMove(board, LegalMoves[moveIndex], board.player[TURN])
+                        discsOnBoard.append(LegalMoves[moveIndex])
+                        lastMove = LegalMoves[moveIndex]
+
+                    if 'hard' in AI[0]:
+                        pass
+
+                    discCount[0] = sum(i.count(board.white) for i in board.currentBoard)
+                    discCount[1] = len(discsOnBoard) - discCount[0]
+                    TURN = (TURN+1)%2
+                    if len(board.allLegalMoves(board, board.player[TURN])) == 0:
+                        TURN = (TURN+1)%2
+                        if len(board.allLegalMoves(board, board.player[TURN])) == 0:
+                            gameOver = True
             background()
-            # ======================END OF CODE FOR BACKGROUND======================
             drawBoard()
         elif WINDOW in ("homeScreen", "playType", "aiType"):
             background()
